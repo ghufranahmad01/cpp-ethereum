@@ -94,8 +94,26 @@ defaults:
     - *update-submodules
     - *environment-info
     - *restore-deps-cache
+    - restore_cache:
+        keys:
+          - ccache-{{arch}}-{{checksum "compiler.version"}}-{{.Branch}}
+          - ccache-{{arch}}-{{checksum "compiler.version"}}
+        paths:
+          - ~/.ccache
+    - run:
+        name: "ccache setup"
+        command: |
+          ccache --version
+          ccache --show-stats
+          ccache --zero-stats
+          ccache --max-size=1G
     - *configure
     - *build
+    - save_cache:
+        key: ccache-{{arch}}-{{checksum "compiler.version"}}-{{.Branch}}
+        paths:
+          - ~/.ccache
+        when: always
     - *save-deps-cache
     - *store-package
     - *restore-ethash-dag
